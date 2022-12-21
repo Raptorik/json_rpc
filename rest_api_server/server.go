@@ -17,7 +17,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type BStruct struct {
+type BodyStruct struct {
 	Jsonrpc float64 `json:"jsonrpc"`
 	Method  string  `json:"method"`
 	Params  []struct {
@@ -36,12 +36,12 @@ func doSomething(rw http.ResponseWriter, r *http.Request) {
 	var vars map[string]string = mux.Vars(r)
 	var occupation string = vars["occupation"]
 	log.Printf(`So you want to be in a %s`, occupation)
+
 	resp := make(map[string]string)
 	occupation = occupation + " :) "
 	log.Printf(`Your parents will honour if you will be in a %s`, occupation)
 
 	respFrom2server := startServer(occupation)
-
 	log.Printf(`Response from JSON-RPS SERVER: %s`, respFrom2server)
 
 	respfromRest := respFrom2server + "That is a very hard decision of you!"
@@ -65,11 +65,11 @@ func startServer(occupation string) string {
 	}
 	body := `{"jsonrpc": 2.0,"method": "Words.Multiply","params": [{"A": "num", "B": "num"}]}`
 	bodytobyte := []byte(body)
-	var bodyStruct BStruct
+	var bodyStruct BodyStruct
 	json.Unmarshal(bodytobyte, &bodyStruct)
 	bodyStruct.Params[0].A = occupation
 	bodyStruct.Params[0].B = "man"
-	resultBody, _ := json.Marshal(&BStruct{
+	resultBody, _ := json.Marshal(&BodyStruct{
 		Jsonrpc: 2.0,
 		Method:  "Words.Multiply",
 		Params:  bodyStruct.Params,

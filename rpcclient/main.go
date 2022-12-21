@@ -10,7 +10,7 @@ import (
 
 func main() {
 	c := http.Client{Timeout: time.Second}
-	req, err := http.NewRequest(`POST`, `http://localhost:8080/military`, nil)
+	req, err := http.NewRequest(`POST`, `http://localhost:5000/military`, nil)
 	if err != nil {
 		fmt.Printf("Error: %s\\n", err)
 		return
