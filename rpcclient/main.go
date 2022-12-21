@@ -1,42 +1,33 @@
 package main
 
 import (
-	"bytes"
-	"github.com/gorilla/rpc/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 )
 
-type Args struct {
-	A, B int
-}
-type Result int
-
 func main() {
-	client := new(http.Client)
-	url := "http://localhost:8081/rpc"
-	args := Args{A: 2, B: 3}
+	c := http.Client{Timeout: time.Second}
+	req, err := http.NewRequest(`POST`, `http://localhost:8080/military`, nil)
+	if err != nil {
+		fmt.Printf("Error: %s\\n", err)
+		return
+	}
+	resp, err := c.Do(req)
+	if err != nil {
+		fmt.Printf("Error: %s\\n", err)
+		return
+	}
 
-	message, err := json.EncodeClientRequest("Arith.Multiply", args)
-	if err != nil {
-		log.Fatalf("%s", err)
+	// read response body
+	body, error := ioutil.ReadAll(resp.Body)
+	if error != nil {
+		fmt.Println(error)
 	}
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(message))
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
+	// print response body
+	log.Println(string(body))
 
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatalf("Error in sending request to %s. %s", url, err)
-	}
 	defer resp.Body.Close()
-
-	var result Result
-	err = json.DecodeClientResponse(resp.Body, &result)
-	if err != nil {
-		log.Fatalf("Couldn't decode response. %s", err)
-	}
-	log.Printf("%d*%d=%d\n", args.A, args.B, result)
 }
